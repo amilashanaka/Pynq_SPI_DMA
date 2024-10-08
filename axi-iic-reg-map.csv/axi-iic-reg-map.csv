@@ -1,0 +1,176 @@
+Register,Address,Field,Access Type,Width,Description
+GIE,0x1c,,read-write,32,"Global Interrupt Enable Register"
+,,GIE,read-write,[31],"Global Interrupt Enable
+0 - All Interrupts disabled; no interrupt (even if unmasked in IER) possible from AXI IIC core
+1 - Unmasked AXI IIC core interrupts are passed to processor
+"
+ISR,0x020,,read-write,32,"Interrupt Status Register"
+,,int0,read-write,[0],"Interrupt0 - Arbitration Lost
+"
+,,int1,read-write,[1],"Interrupt1 - Transmit Error/Slave Transmit Complete
+"
+,,int2,read-write,[2],"Interrupt2 - Transmit FIFO Empty
+"
+,,int3,read-write,[3],"Interrupt3 - Recieve FIFO FULL
+"
+,,int4,read-write,[4],"Interrupt4 - IIC Bus is Not Busy
+"
+,,int5,read-write,[5],"Interrupt5 - Addressed As Slave
+"
+,,int6,read-write,[6],"Interrupt6 - Not Addessed As Slave
+"
+,,int7,read-write,[7],"Interrupt7 - Transmit FIFO Half Empty
+"
+IER,0x028,,read-write,32,"Interrupt Enable Register"
+,,int0,read-write,[0],"Interrupt0 - Arbitration Lost
+"
+,,int1,read-write,[1],"Interrupt1 - Transmit Error/Slave Transmit Complete
+"
+,,int2,read-write,[2],"Interrupt2 - Transmit FIFO Empty
+"
+,,int3,read-write,[3],"Interrupt3 - Recieve FIFO FULL
+"
+,,int4,read-write,[4],"Interrupt4 - IIC Bus is Not Busy
+"
+,,int5,read-write,[5],"Interrupt5 - Addressed As Slave
+"
+,,int6,read-write,[6],"Interrupt6 - Not Addessed As Slave
+"
+,,int7,read-write,[7],"Interrupt7 - Transmit FIFO Half Empty
+"
+SOFTR,0x040,,read-write,32,"Soft Reset Register"
+,,RKEY,write-only,[3:0],"Reset Key - Firmware must write a value of 0xA to this field to
+            cause a soft reset of the Interrupt registers of AXI IIC controller.
+            Writing any other value results in an AXI transaction
+            acknowledgement with SLVERR and no reset occurs.
+"
+CR,0x100,,read-write,32,"Control Register"
+,,EN,read-write,[0],"This bit must be set before any other CR bits have any effect
+0 - resets and disables the AXI IIC controller but not the registers or FIFOs
+1 - enables the AXI IIC controller
+"
+,,TX_FIFO_Reset,read-write,[1],"This bit must be set to flush the FIFO if either (a) arbitration is lost or (b) if a transmit error occurs
+0 - transmit FIFO normal operation
+1 - resets the transmit FIFO
+"
+,,MSMS,read-write,[2],"When this bit is changed from 0 to 1, the
+AXI IIC bus interface generates a START condition in master mode. When
+this bit is cleared, a STOP condition is generated and the AXI IIC bus
+interface switches to slave mode. When this bit is cleared by the
+hardware, because arbitration for the bus has been lost, a STOP
+condition is not generated
+"
+,,TX,read-write,[3],"This bit selects the direction of master/slave transfers.
+0 - selects an AXI IIC receive
+1 - selects an AXI IIC transmit
+"
+,,TXAK,read-write,[4],"This bit specifies the value driven onto
+the sda line during acknowledge cycles for both master and slave recievers.
+0 - acknowledge
+1 - not-acknowledge
+"
+,,RSTA,read-write,[5],"Writing a 1 to this bit generates a repeated START 
+condition on the bus if the AXI IIC bus interface is the current bus
+master. Attempting a repeated START at the wrong time, if the bus is
+owned by another master, results in a loss of arbitration. This bit is reset
+when the repeated start occurs. This bit must be set prior to writing the
+new address to the TX_FIFO or DTR
+"
+,,GC_EN,read-write,[6],"Setting this bit High allows the AXI IIC to respond to a general call address.
+0 - General Call Disabled
+1 - General Call Enabled
+"
+SR,0x104,,read-only,32,"Status Register"
+,,ABGC,read-only,[0],"This bit is set to 1 when another master has issued a general call and
+the general call enable bit is set to 1, CR(6) = 1.
+"
+,,AAS,read-only,[1],"When the address on the IIC bus matches the slave address in the Address register (ADR), the IIC bus interface
+is being addressed as a slave and switches to slave mode. If 10-bit addressing is selected this device only responds to a 10-bit
+address or general call if enabled. This bit is cleared when a stop
+condition is detected or a repeated start occurs.
+0 - indicates not being addressed as a slave
+1 - indicates being addressed as a slave
+"
+,,BB,read-only,[2],"This bit indicates the status of the IIC bus. This bit is set
+when a START condition is detected and cleared when a STOP
+condition is detected.
+0 - indicates the bus is idle
+1 - indicates the bus is busy
+"
+,,SRW,read-only,[3],"When the IIC bus interface has been addressed as a slave (AAS is set), 
+this bit indicates the value of the read/write bit sent by the master.
+This bit is only valid when a complete transfer has occurred and
+no other transfers have been initiated.
+0 - indicates master writing to slave
+1 - indicates master reading from slave
+"
+,,TX_FIFO_Full,read-only,[4],"This bit is set High when the transmit FIFO is full.
+"
+,,RX_FIFO_Full,read-only,[5],"This bit is set High when the receive FIFO is full.
+This bit is set only when all 16 locations in the FIFO are full,
+regardless of the compare value field of the RX_FIFO_PIRQ register.
+"
+,,RX_FIFO_Empty,read-only,[6],"This is set High when the receive FIFO is empty.
+"
+,,TX_FIFO_Empty,read-only,[7],"This is set High when the transmit FIFO is empty.
+"
+TX_FIFO,0x108,,write-only,32,"Transmit FIFO Register"
+,,D7_D0,write-only,[7:0],"If the dynamic stop bit is used and the AXI IIC is a master receiver,
+the value is the number of bytes to receive.
+"
+,,Start,write-only,[8],"The dynamic start bit can be used to send a start or repeated start sequence on the
+IIC bus. A start sequence is generated if the MSMS = 0, a
+repeated start sequence is generated if the MSMS = 1.
+"
+,,Stop,write-only,[9],"The dynamic stop bit can be used to send an IIC stop
+sequence on the IIC bus after the last byte has been transmitted or received.
+"
+RX_FIFO,0x10C,,read-only,32,"Recieve FIFO Register"
+,,D7_D0,read-only,[7:0],"IIC Receive Data
+"
+ADR,0x110,,read-write,32,"Slave Address Register"
+,,Slave_Address,read-write,[7:1],"Address used by the IIC bus interface when in slave mode.
+"
+TX_FIFO_OCY,0x114,,read-only,32,"Transmit FIFO Occupency Register"
+,,Occupancy_Value,read-only,[3:0],"Bit[3] is the MSB. A binary value of 1001 indicates that
+10 locations are full in the FIFO
+"
+RX_FIFO_OCY,0x118,,read-only,32,"Recieve FIFO Occupency Register"
+,,Occupancy_Value,read-only,[3:0],"Bit[3] is the MSB. A binary value of 1001 indicates that
+10 locations are full in the FIFO
+"
+TEN_ADR,0x11C,,read-write,32,"Slave Ten Bit Address Register"
+,,MSB_of_Slave_Address,read-write,[2:0],"Three MSBs of the 10-bit address used by the AXI IIC bus interface when in slave mode.
+"
+RX_FIFO_PIRQ,0x120,,read-write,32,"Recieve FIFO Programmable Depth Interrupt Register"
+,,Compare_Value,read-write,[3:0],"Bit[3] is the MSB. A binary value of 1001 implies that when
+10 locations in the receive FIFO are filled, the receive FIFO
+interrupt is set.
+"
+GPO,0x124,,read-write,32,"General Purpose Output Register"
+,,General_Purpose_Outputs,read-write,[0],"The LSB (Bit[0]) is the first bit populated
+"
+TSUSTA,0x128,,read-write,32,"Timing Parameter TSUSTA Register"
+,,TSUSTA,read-write,[31:0],"Setup time for a repeated START condition.
+"
+TSUSTO,0x12C,,read-write,32,"Timing Parameter TSUSTO Register"
+,,TSUSTO,read-write,[31:0],"Setup time for a repeated STOP condition.
+"
+THDSTA,0x130,,read-write,32,"Timing Parameter THDSTA Register"
+,,THDSTA,read-write,[31:0],"Hold time for a repeated START condition.
+"
+TSUDAT,0x134,,read-write,32,"Timing Parameter TSUDAT Register"
+,,TSUDAT,read-write,[31:0],"Data Setup time
+"
+TBUF,0x138,,read-write,32,"Timing Parameter TBUF Register"
+,,TBUF,read-write,[31:0],"Bus free time between a STOP and START condition
+"
+THIGH,0x13C,,read-write,32,"Timing Parameter THIGH Register"
+,,THIGH,read-write,[31:0],"High Period of the scl clock.
+"
+TLOW,0x140,,read-write,32,"Timing Parameter TLOW Register"
+,,TLOW,read-write,[31:0],"Low Period of scl clock.
+"
+THDDAT,0x144,,read-write,32,"Timing Parameter THDDAT Register"
+,,THDDAT,read-write,[31:0],"Data Hold time
+"
